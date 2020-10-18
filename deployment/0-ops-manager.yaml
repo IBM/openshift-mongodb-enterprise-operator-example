@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ops-manager-admin-secret
+type: Opaque
+stringData:
+  Username: john@example.com
+  # 8 characters minimum
+  # 1 number, 1 letter
+  # 1 special character
+  Password: Passw0rd.
+  FirstName: John
+  LastName: Appleseed
+---
+apiVersion: mongodb.com/v1
+kind: MongoDBOpsManager
+metadata:
+  name: ops-manager
+spec:
+  version: 4.2.8
+  # adminCredentials value is the name of secret above
+  adminCredentials: ops-manager-admin-secret
+  externalConnectivity:
+    type: LoadBalancer
+  applicationDatabase:
+    members: 3
+    # podSpec:
+    #   cpu: '1'
+    #   memory: '2G'
