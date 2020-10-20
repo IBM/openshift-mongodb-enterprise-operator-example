@@ -36,9 +36,11 @@ Clone the `openshift-mongodb-enterprise-operator-example` repo locally. In a ter
 
 ```bash
 git clone https://github.com/IBM/openshift-mongodb-enterprise-operator-example
+
+cd openshift-mongodb-enterprise-operator-example
 ```
 
-Make sure you are also logged in on your OpenShift cluster as an admin. Then create a project for your MongoDB resources.
+Make sure you are also logged in your OpenShift cluster as an admin. Then create a project for your MongoDB resources.
 
 ```
 oc new-project mongodb
@@ -46,12 +48,33 @@ oc new-project mongodb
 
 ### 2. Install MongoDB Enterprise Advanced Operator
 <!-- register cluster with rh marketplace -->
+To use software from the Red Hat Marketplace, you will need to register your cluster in it. This allows the cluster to pull the container images that are used by the software. To register your OpenShift on IBM Cloud, you can follow the instructions here:
 * [Register Cluster with Red Hat Marketplace](docs/register-cluster-marketplace.md)
-* [Install Operator using Marketplace](docs/install-mongodb-enterprise-operator-marketplace.md)
+
+Once you're done registering your OpenShift cluster, you can now proceed on installing the MongoDB Enterprise Advanced Operator in the Marketplace.
+
+To install, go to the main page of the [Red Hat Marketplace](https://marketplace.redhat.com/en-us) and search for MongoDB.
+
+![mongodb-marketplace](docs/images/mongodb-marketplace.png)
+
+Select the **MongoDB Enterprise Advanced from IBM** and select the **Free Trial** option. This would give you 30 days to try it out. Once you've done that, you should be redirected to the software page, if not - click on the **Workspace** > **My Software** on the top of the page then click on the MongoDB Enterprise.
+
+![mongodb-software](docs/images/mongodb-software.png)
+
+Now at the Operators tab, you can click on **Install operator** then choose your cluster for the **Target clusters** section and for the **Namespace Scope**, from the drop-down select **mongodb** namespace which you created in step 1.
+
+![mongodb-operator](docs/images/mongodb-operator-install.png)
+
+You should now be back on the Operators tab on your MongoDB Enterprise software page. It would say the **Status** is **Up to date** when it's ready.
+
+![mongo up to date](docs/images/mongodb-ready.png)
+
+You can now proceed to the next step when you see the status above.
 
 ### 3. Install MonogDB Resources
 
-<!-- create admin secret and ops manager -->
+Now that you've installed the MongoDB Enterprise Operator, you can now deploy the custom resources it provides (MongoDB Deployment, Ops Manager, Users).
+
 To deploy a MongoDB, you'll need an Ops Manager. The Ops Manager is the management platform for your MongoDB clusters.
 
 Review the `deployment/0-ops-manager.yaml` file. This deploys the Ops Manager and a secret for the initial login. Deploy using the command:
@@ -116,7 +139,7 @@ Wait for its `STATE` to be `Running`. You can also view the Pods that these cust
 
 ### 4. Install cert-manager
 
-Cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources. We're going to use cert-manager to issue self-signed certificates.
+[Cert-manager](https://cert-manager.io/docs/) is a native Kubernetes certificate management controller to automate the management and issuance of TLS certificates from various issuing sources. We're going to use cert-manager to issue self-signed certificates.
 
 Using the OperatorHub in OpenShift, look for `cert-manager` and install it. Then create the namespace for its resources.
 ```
