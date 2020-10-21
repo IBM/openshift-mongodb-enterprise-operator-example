@@ -49,7 +49,9 @@ oc new-project mongodb
 ### 2. Install MongoDB Enterprise Advanced Operator
 <!-- register cluster with rh marketplace -->
 To use software from the Red Hat Marketplace, you will need to register your cluster in it. This allows the cluster to pull the container images that are used by the software. To register your OpenShift on IBM Cloud, you can follow the instructions here:
-* [Register Cluster with Red Hat Marketplace](docs/register-cluster-marketplace.md)
+* [Register OpenShift cluster with Red Hat Marketplace](https://marketplace.redhat.com/en-us/documentation/clusters#register-openshift-cluster-with-red-hat-marketplace)
+
+> IMPORTANT: For OpenShift on IBM Cloud clusters, you must reload all your worker nodes for the pull secrets from the registration step to apply. Then you can proceed below.
 
 Once you're done registering your OpenShift cluster, you can now proceed on installing the MongoDB Enterprise Advanced Operator in the Marketplace.
 
