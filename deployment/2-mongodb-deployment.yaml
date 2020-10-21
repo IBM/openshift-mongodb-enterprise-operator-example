@@ -1,0 +1,21 @@
+apiVersion: mongodb.com/v1
+kind: MongoDB
+metadata:
+  name: example-mongo
+spec:
+  # the name of the secret in 1-ops-manager-config-secret.yaml
+  credentials: ops-manager-organization-apikey
+  members: 3
+  # the name of the cm in 1-ops-manager-config-secret.yaml
+  opsManager:
+    configMapRef:
+      name: ops-manager-example-mongo-config
+  type: ReplicaSet
+  version: 4.2.2-ent
+  # security:
+  #   tls:
+  #     enabled: true
+  #     ca: custom-ca
+  #   authentication:
+  #     enabled: true
+  #     modes: ["SCRAM"]

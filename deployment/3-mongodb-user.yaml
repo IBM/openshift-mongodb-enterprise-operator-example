@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongodb-example-user-password
+type: Opaque
+stringData:
+  password: password
+---
+apiVersion: mongodb.com/v1
+kind: MongoDBUser
+metadata:
+  name: mongodb-example-user
+spec:
+  passwordSecretKeyRef:
+    name: mongodb-example-user-password
+    # Match to metadata.name of the User Secret
+    key: password
+  username: mongodb-example-user
+  db: example
+  # authentication database
+  mongodbResourceRef:
+    name: example-mongo
+    # Match to MongoDB resource using authenticaiton
+    # need orgId and projectName in config map of mongodb resource
+  roles:
+    - db: example
+      name: readWrite
