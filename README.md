@@ -11,17 +11,24 @@ When you have completed this code pattern, you will understand how to:
 * Secure the MongoDB deployment with Authentication and add TLS using cert-manager.
 * Connect an example microservice with the secure MongoDB deployment.
 
-<!--add an image in this path-->
-<!-- ![architecture](doc/source/images/architecture.png) -->
+![architecture](docs/images/architecture.png)
 
 ## Flow
 
-1. Flow
-2. Flow
+1. User registers OpenShift cluster with Red Hat Marketplace
+2. User can now install MongoDB Enterprise Operator in OpenShift
+3. Deploy an Ops Manager platform using with the provided APIs from the operator.
+4. Deploy the MongoDB replica set deployment which is also managed by the Ops Manager
+5. Install cert-manager operator which helps manage TLS certificates natively in OpenShift.
+6. Create certificates for each replica of the MongoDB deployment.
+7. Install the created certificates and enable TLS and Authentication on the MongoDB deployment.
+8. Add a MongoDB user for the MongoDB deployment with the operator.
+9. Deploy and connect an example Node.js application to the secured MongoDB database.
 
 # Prerequisites
 
 * OpenShift Cluster
+* OpenShift CLI (oc)
 
 # Steps
 
