@@ -1,25 +1,34 @@
 # Securing MongoDB Enterprise on OpenShift
 
-In this code pattern, ...
+Deploying a MongoDB cluster can be a challenge as there are a lot of pieces and configuration involved like setting up the instances, providing backups, networking, etc. With the MongoDB Enterprise Kubernetes Operator, it minimizes and standardizes these steps in your Kubernetes and/or Openshift environments. This makes deploying a MongoDB in your own environment easier.
+
+With the use of the operator, you can deploy MongoDB resources using the Kubernetes API and manage them natively. In this code pattern, you will learn how to install and use the operator and deploy a replica set. You will also secure the MongoDB deployment with authentication and manage users natively in Kubernetes/OpenShift. You will also secure it by adding TLS with the help of cert-manager. Cert-manager is another operator that allows you to manage certificates natively in the same environment.
 
 When you have completed this code pattern, you will understand how to:
 
-* [goal 1]
-* [goal 2]
-* [goal 3]
-* [goal 4]
+* Use the Red Hat Marketplace and install operators
+* Install MongoDB Enterprise Advanced Operator in OpenShift and deploy a MongoDB replica set using the operator.
+* Secure the MongoDB deployment with Authentication and add TLS using cert-manager.
+* Connect an example microservice with the secure MongoDB deployment.
 
-<!--add an image in this path-->
-<!-- ![architecture](doc/source/images/architecture.png) -->
+![architecture](docs/images/architecture.png)
 
 ## Flow
 
-1. Flow
-2. Flow
+1. User registers OpenShift cluster with Red Hat Marketplace
+2. User can now install MongoDB Enterprise Operator in OpenShift
+3. Deploy an Ops Manager platform using with the provided APIs from the operator.
+4. Deploy the MongoDB replica set deployment which is also managed by the Ops Manager
+5. Install cert-manager operator which helps manage TLS certificates natively in OpenShift.
+6. Create certificates for each replica of the MongoDB deployment.
+7. Install the created certificates and enable TLS and Authentication on the MongoDB deployment.
+8. Add a MongoDB user for the MongoDB deployment with the operator.
+9. Deploy and connect an example Node.js application to the secured MongoDB database.
 
 # Prerequisites
 
 * OpenShift Cluster
+* OpenShift CLI (oc)
 
 # Steps
 
@@ -285,9 +294,52 @@ Now that you have a secure MongoDB deployment, the next step guides you how to c
 
 ### 6. Deploy sample application
 
-# Sample output
+Now you can connect your microservices with the secured MongoDB deployment. An example nodejs application is provided in this repo `example-applications/nodejs`.
 
-<!-- ![sample_output](doc/source/images/sample_output.png) -->
+You can build and push the example app as a container image in Docker Hub.
+
+```
+cd example-applications/nodejs
+docker build -t <your-dockerhub-username>/example-nodejs-mongodb:1.0
+docker push <your-dockerhub-username>/example-nodejs-mongodb:1.0
+```
+
+Then review the `example-applications/nodejs/deployment.yaml` file. The first item is a Secret. Review the values for:
+* `MONGODB_REPLICA_HOSTNAMES`. You can find them using your Ops Manager and go to the **Organization** > **Project** you created and click on the MongoDB deployment. Make sure to separate them using a commas.
+* `MONGODB_REPLICA_SET` is your MongoDB deployment name.
+* `MONGODB_USER`, `MONGODB_PASSWORD`, `MONGODB_AUTH_DBNAME` is the credentials you created using `deployment/3-mongodb-user.yaml` and make sure `MONGODB_DBNAME` is the database where your user has readWrite privileges.
+* You can leave `MONGODB_CA_PATH` as is, the deployment resource in the yaml file mounts the `ca-key-pair` secret which you created in Step 5.
+
+Then change the container image name (`anthonyamanse/example-nodejs-mongodb:1.0`) of the deployment in the same yaml file with the container image name you just pushed.
+
+You can now deploy the example application:
+```
+oc apply -f deployment.yaml
+```
+
+Access the application by getting the route:
+
+```
+oc get routes
+NAME                   HOST/PORT                                                                                                                       PATH   SERVICES               PORT    TERMINATION   WILDCARD
+example-node-service   example-node-service-dev-db.anthony-marketplace-dev-f2c6cdc6801be85fd188b09d006f13e3-0000.us-south.containers.appdomain.cloud          example-node-service   <all>                 None
+```
+
+Open the route `example-node-service-...cloud/api-docs` **(Add the path /api-docs)** in your browser. You should see a swagger UI - try and add a new transaction using "POST /transactions".
+
+![example-output](docs/images/example-output.png)
+
+You should see a 201 response. You can now try "GET /transactions" and you can also see the MongoDB documents using your Ops Manager. Go to your **Organization** > **Project** > **Your Deployment** then **Data** tab
+
+![mongodb-documents](docs/images/mongodb-documents.png)
+
+## Learn More
+
+* [Learn more about using Mongoose with NodeJS](https://mongoosejs.com/docs/)
+* [Learn about Data Modeling with MongoDB](https://docs.mongodb.com/manual/core/data-modeling-introduction/)
+* [Official Docs on using MongoDB Enterprise Operator](https://docs.mongodb.com/kubernetes-operator/stable/)
+* [Learn more about cert-manager](https://cert-manager.io/docs/)
+* [Red Hat Marketplace](https://marketplace.redhat.com/)
 
 ## License
 

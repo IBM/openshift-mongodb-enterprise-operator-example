@@ -1,0 +1,13 @@
+components:
+  schemas:
+    Transaction:
+      type: object
+      properties:
+        transactionId:
+          type: string
+        transactionName:
+          type: string
+        price:
+          type: number
+      xml:
+        name: Transaction

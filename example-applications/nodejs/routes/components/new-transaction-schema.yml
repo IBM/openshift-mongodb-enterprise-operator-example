@@ -1,0 +1,13 @@
+components:
+  schemas:
+    NewTransaction:
+      type: object
+      properties:
+        transactionName:
+          type: string
+          example: Real Coffee Shop
+        price:
+          type: number
+          example: 19.99
+      xml:
+        name: NewTransaction
