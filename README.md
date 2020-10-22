@@ -300,7 +300,7 @@ You can build and push the example app as a container image in Docker Hub.
 
 ```
 cd example-applications/nodejs
-docker build -t <your-dockerhub-username>/example-nodejs-mongodb:1.0
+docker build -t <your-dockerhub-username>/example-nodejs-mongodb:1.0 .
 docker push <your-dockerhub-username>/example-nodejs-mongodb:1.0
 ```
 
