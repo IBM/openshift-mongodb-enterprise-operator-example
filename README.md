@@ -1,33 +1,33 @@
-# Securing MongoDB Enterprise on OpenShift
+# Secure MongoDB Enterprise on Red Hat OpenShift
 
-Deploying a MongoDB cluster can be a challenge as there are a lot of pieces and configuration involved like setting up the instances, providing backups, networking, etc. With the MongoDB Enterprise Kubernetes Operator, it minimizes and standardizes these steps in your Kubernetes and/or Openshift environments. This makes deploying a MongoDB in your own environment easier.
+Deploying a MongoDB cluster can be a challenge because you have to account for numerous pieces and configurations like setting up the instances, providing backups, networking, and more. The MongoDB Enterprise Kubernetes Operator minimizes and standardizes these steps in your Kubernetes or Red Hat Openshift environments, which simplifies deploying a MongoDB in your own environment.
 
-With the use of the operator, you can deploy MongoDB resources using the Kubernetes API and manage them natively. In this code pattern, you will learn how to install and use the operator and deploy a replica set. You will also secure the MongoDB deployment with authentication and manage users natively in Kubernetes/OpenShift. You will also secure it by adding TLS with the help of cert-manager. Cert-manager is another operator that allows you to manage certificates natively in the same environment.
+With the operator, you can deploy MongoDB resources using the Kubernetes API and manage them natively. In this code pattern, you will learn how to install and use the operator and deploy a replica set. You will also secure the MongoDB deployment with authentication and manage users natively in Kubernetes or OpenShift. You will also secure it by adding TLS with the help of cert-manager. Cert-manager is another operator that allows you to manage certificates natively in the same environment.
 
 When you have completed this code pattern, you will understand how to:
 
 * Use the Red Hat Marketplace and install operators
 * Install MongoDB Enterprise Advanced Operator in OpenShift and deploy a MongoDB replica set using the operator.
-* Secure the MongoDB deployment with Authentication and add TLS using cert-manager.
+* Secure the MongoDB deployment with authentication and add TLS using cert-manager.
 * Connect an example microservice with the secure MongoDB deployment.
 
 ![architecture](docs/images/architecture.png)
 
 ## Flow
 
-1. User registers OpenShift cluster with Red Hat Marketplace
-2. User can now install MongoDB Enterprise Operator in OpenShift
-3. Deploy an Ops Manager platform using with the provided APIs from the operator.
-4. Deploy the MongoDB replica set deployment which is also managed by the Ops Manager
-5. Install cert-manager operator which helps manage TLS certificates natively in OpenShift.
+1. User registers OpenShift cluster with Red Hat Marketplace.
+2. User can now install MongoDB Enterprise Operator in OpenShift.
+3. Deploy an Ops Manager platform using the provided APIs from the operator.
+4. Deploy the MongoDB replica set deployment which is also managed by the Ops Manager.
+5. Install the cert-manager operator which helps manage TLS certificates natively in OpenShift.
 6. Create certificates for each replica of the MongoDB deployment.
-7. Install the created certificates and enable TLS and Authentication on the MongoDB deployment.
+7. Install the created certificates and enable TLS and authentication on the MongoDB deployment.
 8. Add a MongoDB user for the MongoDB deployment with the operator.
 9. Deploy and connect an example Node.js application to the secured MongoDB database.
 
 # Prerequisites
 
-* OpenShift Cluster
+* OpenShift cluster
 * OpenShift CLI (oc)
 
 # Steps
@@ -49,7 +49,7 @@ git clone https://github.com/IBM/openshift-mongodb-enterprise-operator-example
 cd openshift-mongodb-enterprise-operator-example
 ```
 
-Make sure you are also logged in your OpenShift cluster as an admin. Then create a project for your MongoDB resources.
+Make sure you are also logged in to your OpenShift cluster as an admin. Then create a project for your MongoDB resources.
 
 ```
 oc new-project mongodb
@@ -62,39 +62,42 @@ To use software from the Red Hat Marketplace, you will need to register your clu
 
 > IMPORTANT: For OpenShift on IBM Cloud clusters, you must reload all your worker nodes for the pull secrets from the registration step to apply. Then you can proceed below.
 
-Once you're done registering your OpenShift cluster, you can now proceed on installing the MongoDB Enterprise Advanced Operator in the Marketplace.
+Once you're done registering your OpenShift cluster, you can now install the MongoDB Enterprise Advanced Operator in the Marketplace.
 
 To install, go to the main page of the [Red Hat Marketplace](https://marketplace.redhat.com/en-us) and search for MongoDB.
 
 ![mongodb-marketplace](docs/images/mongodb-marketplace.png)
 
-Select the **MongoDB Enterprise Advanced from IBM** and select the **Free Trial** option. This would give you 30 days to try it out. Once you've done that, you should be redirected to the software page, if not - click on the **Workspace** > **My Software** on the top of the page then click on the MongoDB Enterprise.
+Select the **MongoDB Enterprise Advanced from IBM** and select the **Free Trial** option to get a 30-day trial. Next, you should be redirected to the software page. If not, click on the **Workspace** > **My Software** at the top of the page and select **MongoDB Enterprise**.
 
 ![mongodb-software](docs/images/mongodb-software.png)
 
-Now at the Operators tab, you can click on **Install operator** then choose your cluster for the **Target clusters** section and for the **Namespace Scope**, from the drop-down select **mongodb** namespace which you created in step 1.
+On the Operators tab, you can click on **Install operator** and choose your cluster for the **Target clusters** section. For the Namespace Scope, from the drop-down select the **mongodb** namespace which you created in step 1.
 
 ![mongodb-operator](docs/images/mongodb-operator-install.png)
 
-You should now be back on the Operators tab on your MongoDB Enterprise software page. It would say the **Status** is **Up to date** when it's ready.
+You should now be back on the Operators tab on your MongoDB Enterprise software page. The Status says **Up to date** when it's ready.
 
 ![mongo up to date](docs/images/mongodb-ready.png)
 
-You can now proceed to the next step when you see the status above.
+When you see that status, move on to Step 3.
 
 ### 3. Install MonogDB Resources
 
-Now that you've installed the MongoDB Enterprise Operator, you can now deploy the custom resources it provides (MongoDB Deployment, Ops Manager, Users).
+Now that you've installed the MongoDB Enterprise Operator, you can deploy the custom resources it provides (MongoDB Deployment, Ops Manager, Users).
 
-To deploy a MongoDB, you'll need an Ops Manager. The Ops Manager is the management platform for your MongoDB clusters.
+To deploy a MongoDB, you need an Ops Manager. The Ops Manager is the management platform for your MongoDB clusters.
 
-Review the `deployment/0-ops-manager.yaml` file. This deploys the Ops Manager and a secret for the initial login. Deploy using the command:
+Review the `deployment/0-ops-manager.yaml` file which deploys the Ops Manager and a secret for the initial login. Deploy using the command:
 
 ```
 oc apply -f deployment/0-ops-manager.yaml
 ```
 
-The Ops Manager will also deploy a database with 3 replicas. Wait for the `STATE (OPSMANAGER)` to be `Running`. To check,
+The Ops Manager will also deploy a database with 3 replicas. Wait for the `STATE (OPSMANAGER)` to be `Running`. 
+
+To check, use:
+
 ```
 oc get opsmanagers
 
@@ -102,7 +105,8 @@ NAME          REPLICAS   VERSION   STATE (OPSMANAGER)   STATE (APPDB)   STATE (B
 ops-manager              4.2.8     Running              Running         Pending          14m
 ```
 
-Now, you can go to the Ops Manager dashboard. To get the url,
+Now, you can go to the Ops Manager dashboard. To get the URl:
+
 ```
 oc get svc
 
@@ -111,33 +115,38 @@ NAME                  TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)    
 ops-manager-svc-ext   LoadBalancer   172.21.118.38    169.xx.xx.xx   8080:31643/TCP   11m
 ```
 
-Get the EXTERNAL-IP and open your browser on `169.xx.xx.xx:8080`. Log in with your credentials you set in `deployment/0-ops-manager.yaml` and it will ask you to configure the Ops Manager. You can choose to use the default values.
+Get the EXTERNAL-IP and open your browser on `169.xx.xx.xx:8080`. Log in with your credentials you set in `deployment/0-ops-manager.yaml`, and follow the prompts to configure the Ops Manager. You can choose to use the default values.
 
 Then, what you'll need to deploy a MongoDB cluster is an API key. It is recommended to use an Organization API key instead of a global one.
 
-To create an Organization, click on the upper right corner that says your account name then click on Organizations. Click on **+ New Organization** to create a new one. Name it `example-organization` or anything.
+To create an Organization, click on the upper right corner that says your account name and select **Organizations**. Click on **+ New Organization** to create a new one. Name it `example-organization` or another name you choose.
 
 ![example-org](docs/images/0-example-organization.png)
-To create the API key, go to **Access > API Keys** and create a new one. Grab the **Public Key** and place it in the `user` value in `deployment/1-ops-manager-config-secret` then make sure to set the **Organization Permissions** to `Organization Owner`. Enter a short description. Then copy the **Private Key** in the `publicApiKey` value in `deployment/1-ops-manager-config-secret`. You will also need to add an **API Whitelist** entry. Add `172.30.0.0/16`, this is the internal IP addresses of the pods in OpenShift on IBM Cloud.
+
+To create the API key, go to **Access > API Keys** and create a new one. Grab the Public Key and place it in the `user` value in `deployment/1-ops-manager-config-secret`. Then, make sure to set the Organization Permissions to `Organization Owner`. Enter a short description. 
+
+Next, copy the Private Key in the `publicApiKey` value in `deployment/1-ops-manager-config-secret`. You will also need to add an API Whitelist entry. Add `172.30.0.0/16`, because this is the internal IP addresses of the pods in OpenShift on IBM Cloud.
+
 ![example-org-apikey](docs/images/1-example-org-apikey.png)
 
-Then for the ConfigMap on `deployment/1-ops-manager-config-secret`, the values for the following are:
+For the ConfigMap on `deployment/1-ops-manager-config-secret`, the values for the following are:
 
-`baseUrl` is from `oc get om ops-manager -o jsonpath='{.status.opsManager.url}'`
-
-`orgId` is in your Organization dashboard **Settings > Organization ID**
-
-`projectName` is the project name you want
+* `baseUrl` is from `oc get om ops-manager -o jsonpath='{.status.opsManager.url}'`
+* `orgId` is in your Organization dashboard which you can find navigating to **Settings > Organization ID**
+* `projectName` is the project name you want
 
 Then you can create the secret and config map using:
+
 ```
 oc create -f  deployment/1-ops-manager-config-secret.yaml
 ```
 
 Now you can create the MongoDB deployment:
+
 ```
 oc apply -f deployment/2-mongodb-deployment.yaml
 ```
+
 This creates a replica set with 3 replicas. To check the status:
 
 ```
@@ -146,21 +155,25 @@ oc get mongodb
 NAME            TYPE         STATE     VERSION     AGE
 example-mongo   ReplicaSet   Running   4.2.2-ent   4h18m
 ```
-Wait for its `STATE` to be `Running`. You can also view the Pods that these custom resources created. You should also see the new MongoDB in your Ops Manager dashboard. You'll notice that TLS is not enabled. You can enable it by generating certificates and adding them in your cluster. The next steps will guide you in creating the certificates using cert-manager.
+
+Wait for its `STATE` to be `Running`. You can also view the pods that these custom resources created. You should see the new MongoDB in your Ops Manager dashboard. Notice that TLS is not enabled. You can enable it by generating certificates and adding them in your cluster. The next steps guide you in creating the certificates using cert-manager.
 
 ### 4. Install cert-manager
 
-[Cert-manager](https://cert-manager.io/docs/) is a native Kubernetes certificate management controller to automate the management and issuance of TLS certificates from various issuing sources. We're going to use cert-manager to issue self-signed certificates.
+[cert-manager](https://cert-manager.io/docs/) is a native Kubernetes certificate management controller that automates the management and issuance of TLS certificates from various issuing sources. We're going to use cert-manager to issue self-signed certificates.
 
 Using the OperatorHub in OpenShift, look for `cert-manager` and install it. Then create the namespace for its resources.
+
 ```
 oc create namespace cert-manager
 ```
 
-The install the cert-manager components.
+Install the cert-manager components.
+
 ```
 oc apply -f cert-manager/cert-manager.yaml
 ```
+
 Make sure all the pods are running.
 
 ```
@@ -172,16 +185,16 @@ cert-manager-cainjector-745cf7d9b6-9x82s   1/1     Running   0          58s
 cert-manager-webhook-7cffc6c677-cphsr      1/1     Running   0          58s
 ```
 
-### 5. Generate Certificates and enable TLS
+### 5. Generate certificates and enable TLS
 
-To generate self signed certificates, you can generate a certificate authority of your own using the tool `openssl`. Do the following commands to generate the CA's key pair.
+To generate self-signed certificates, you can generate a certificate authority of your own using the tool `openssl`. Do the following commands to generate the CA's key pair.
 
 ```
 openssl genrsa -out ca.key 4096
 openssl req -x509 -new -nodes -key ca.key -days 3650 -reqexts v3_req -extensions v3_ca -out ca.crt
 ```
 
-Then create a tls secret using the generated files `ca.crt` and `ca.key`.
+Create a TLS secret using the generated files `ca.crt` and `ca.key`.
 
 ```
 oc create secret tls ca-key-pair --cert=ca.crt --key=ca.key
@@ -198,7 +211,7 @@ NAME                READY   AGE
 mongodb-ca-issuer   True    18s
 ```
 
-Then, grab the hostnames of the replicas of your MongoDB. You can find them using your **Ops Manager** and go to the **Organization** > **Project** you created and click on the MongoDB deployment.
+Next, grab the hostnames of the replicas of your MongoDB. You can find them using your Ops Manager. Navigate to the **Organization** > **Project** you created and click on the MongoDB deployment.
 
 ![hostnames](docs/images/2-example-mongo-domains.png)
 
@@ -229,7 +242,7 @@ example-mongo-1                                    kubernetes.io/tls            
 example-mongo-2                                    kubernetes.io/tls                     3      2m14s
 ```
 
-The MongoDB expects PEM files (combination of certificate and key). You can same them locally with the format of the filenames like "**mongodbName**-**replicaNumber**-pem" (e.g. example-mongo-0-pem).
+The MongoDB expects PEM files (combination of certificate and key). You can save them locally with the format of the filenames like "**mongodbName**-**replicaNumber**-pem" (e.g. example-mongo-0-pem).
 
 You can grab the certificates' secrets and save them using the following commands:
 
@@ -241,7 +254,7 @@ oc get secret example-mongo-1 -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | b
 oc get secret example-mongo-2 -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | base64 --decode > example-mongo-2-pem
 ```
 
-These create the files `example-mongo-0-pem`,`example-mongo-1-pem`,`example-mongo-2-pem`. Now, you need to create the certificate with the pem files. Secret name should be "**mongodbName**-cert" format.
+Create the files `example-mongo-0-pem`,`example-mongo-1-pem`,`example-mongo-2-pem`. Now, you need to create the certificate with the pem files. The secret name should be "**mongodbName**-cert" format.
 
 The following command creates an `example-mongo-cert` with the pem files from above.
 
@@ -249,7 +262,7 @@ The following command creates an `example-mongo-cert` with the pem files from ab
 oc create secret generic example-mongo-cert --from-file=example-mongo-0-pem --from-file=example-mongo-1-pem --from-file=example-mongo-2-pem
 ```
 
-You also need to create a config map of you custom CA certificate. You can use the `ca.crt` file that you created:
+You also need to create a config map of your custom CA certificate. You can use the `ca.crt` file that you created:
 
 ```
 oc create configmap custom-ca --from-file=ca-pem=ca.crt
@@ -261,7 +274,8 @@ Now you can enable TLS on your MongoDB. Uncomment the `security` block on the `d
 oc apply -f deployment/2-mongodb-deployment.yaml
 ```
 
-This process can take time as the mongo agents enable both tls and authentication. Check the state using `oc get mongodb` again.
+This process can take time as the Mongo agents enable both TLS and authentication. Check the state using `oc get mongodb` again.
+
 ```
 oc get mongodb
 
@@ -269,7 +283,7 @@ NAME            TYPE         STATE     VERSION     AGE
 example-mongo   ReplicaSet   Running   4.2.2-ent   4h18m
 ```
 
-Also, in your Ops Manager, your deployment should show that TLS and AUTH is enabled
+Also, in your Ops Manager, your deployment should show that TLS and AUTH is enabled:
 
 ![example-tls-auth-enabled](docs/images/3-example-mongo-tls-auth.png)
 
@@ -281,7 +295,7 @@ Review the `deployment/3-mongodb-user.yaml`. This creates a secret for the passw
 oc apply -f deployment/3-mongodb-user.yaml
 ```
 
-To check the status, execute the command below. The `STATE` should be `Updated`. You can also check the newly created user in your Ops Manager. It should also show up in MongoDB Users in your **Project** > **Security**
+To check the status, execute the command below. The `STATE` should be `Updated`. You can also check the newly created user in your Ops Manager. It should also show up in MongoDB Users in your **Project** > **Security**.
 
 ```
 oc get mongodbusers
@@ -290,11 +304,11 @@ NAME                   STATE     AGE
 mongodb-example-user   Updated   72s
 ```
 
-Now that you have a secure MongoDB deployment, the next step guides you how to connect to this database from your applications or microservices in your OpenShift cluster.
+Now that you have a secure MongoDB deployment, follow the steps below to connect to this database from your applications or microservices in your OpenShift cluster.
 
-### 6. Deploy sample application
+### 6. Deploy a sample application
 
-Now you can connect your microservices with the secured MongoDB deployment. An example nodejs application is provided in this repo `example-applications/nodejs`.
+You can connect your microservices with the secured MongoDB deployment. An example Node.js application is provided in this repo `example-applications/nodejs`.
 
 You can build and push the example app as a container image in Docker Hub.
 
@@ -305,14 +319,16 @@ docker push <your-dockerhub-username>/example-nodejs-mongodb:1.0
 ```
 
 Then review the `example-applications/nodejs/deployment.yaml` file. The first item is a Secret. Review the values for:
-* `MONGODB_REPLICA_HOSTNAMES`. You can find them using your Ops Manager and go to the **Organization** > **Project** you created and click on the MongoDB deployment. Make sure to separate them using a commas.
-* `MONGODB_REPLICA_SET` is your MongoDB deployment name.
-* `MONGODB_USER`, `MONGODB_PASSWORD`, `MONGODB_AUTH_DBNAME` is the credentials you created using `deployment/3-mongodb-user.yaml` and make sure `MONGODB_DBNAME` is the database where your user has readWrite privileges.
-* You can leave `MONGODB_CA_PATH` as is, the deployment resource in the yaml file mounts the `ca-key-pair` secret which you created in Step 5.
 
-Then change the container image name (`anthonyamanse/example-nodejs-mongodb:1.0`) of the deployment in the same yaml file with the container image name you just pushed.
+* `MONGODB_REPLICA_HOSTNAMES`. You can find them using your Ops Manager and go to the **Organization** > **Project** you created and click on the MongoDB deployment. Make sure to separate them using commas.
+* `MONGODB_REPLICA_SET` is your MongoDB deployment name.
+* `MONGODB_USER`, `MONGODB_PASSWORD`, `MONGODB_AUTH_DBNAME` are the credentials you created using `deployment/3-mongodb-user.yaml` Make sure `MONGODB_DBNAME` is the database where your user has readWrite privileges.
+* You can leave `MONGODB_CA_PATH` as is. The deployment resource in the yaml file mounts the `ca-key-pair` secret which you created in Step 5.
+
+Change the container image name (`anthonyamanse/example-nodejs-mongodb:1.0`) of the deployment in the same yaml file with the container image name you just pushed.
 
 You can now deploy the example application:
+
 ```
 oc apply -f deployment.yaml
 ```
@@ -325,7 +341,7 @@ NAME                   HOST/PORT                                                
 example-node-service   example-node-service-dev-db.anthony-marketplace-dev-f2c6cdc6801be85fd188b09d006f13e3-0000.us-south.containers.appdomain.cloud          example-node-service   <all>                 None
 ```
 
-Open the route `example-node-service-...cloud/api-docs` **(Add the path /api-docs)** in your browser. You should see a swagger UI - try and add a new transaction using "POST /transactions".
+Open the route `example-node-service-...cloud/api-docs` **(Add the path /api-docs)** in your browser. You should see a Swagger UI. Try and add a new transaction using "POST /transactions".
 
 ![example-output](docs/images/example-output.png)
 
